@@ -40,7 +40,7 @@
             }
             $tabs[] = ['rekap.index', [], 'Rekap', 'i-star', request()->routeIs('rekap.*')];
             if ($me->isKasir()) {
-                $tabs[] = ['tarif.index', [], 'Pengaturan', 'i-gear', request()->routeIs('tarif.*', 'impor.*')];
+                $tabs[] = ['tarif.index', [], 'Pengaturan', 'i-gear', request()->routeIs('tarif.*', 'impor.*', 'jenis.*')];
             }
         }
     @endphp

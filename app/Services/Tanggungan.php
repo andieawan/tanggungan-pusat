@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\UserError;
+use App\Models\JenisTagihan;
 use App\Models\Kelas;
 use App\Models\Pembayaran;
 use App\Models\PembayaranRinci;
@@ -16,11 +17,16 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Aturan tanggungan siswa: tarif → tagihan per siswa → pembayaran (kuitansi) → rincian per tagihan.
- * Jenis saat ini: daftar ulang (sekali setahun, boleh diangsur) dan iuran syariah (per bulan, Juli–Juni).
+ * Jenis tagihan diatur di tabel jenis_tagihan (bawaan: daftar ulang = tahunan, iuran syariah = bulanan; bendahara bisa
+ * menambah ujian, PKL, wisuda, dst.). Tahunan: satu tagihan per tahun ajaran (bulan = 0), boleh diangsur.
  */
 class Tanggungan
 {
-    public const JENIS = ['du' => 'Daftar Ulang', 'syariah' => 'Iuran Syariah'];
+    /** @return Collection<string,JenisTagihan> kode => jenis (semua, termasuk nonaktif — untuk label data lama) */
+    public static function jenis(): Collection
+    {
+        return JenisTagihan::urut()->get()->keyBy('kode');
+    }
 
     /** Urutan bulan dalam satu tahun ajaran. */
     public const BULAN_TA = [7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6];
@@ -92,7 +98,20 @@ class Tanggungan
 
     public static function label(string $jenis, int $bulan, string $tahun): string
     {
-        return $jenis === 'syariah' ? 'Syariah '.self::namaBulan($bulan).' '.self::tahunKalender($tahun, $bulan) : (self::JENIS[$jenis] ?? $jenis).' '.$tahun;
+        $j = self::namaJenis();
+
+        return $bulan > 0 ? ($j[$jenis]['pendek'] ?? $jenis).' '.self::namaBulan($bulan).' '.self::tahunKalender($tahun, $bulan) : ($j[$jenis]['nama'] ?? $jenis).' '.$tahun;
+    }
+
+    /** @return array<string,array{nama:string,pendek:string}> */
+    private static function namaJenis(): array
+    {
+        static $peta = null;
+        if ($peta === null || app()->runningUnitTests()) {
+            $peta = JenisTagihan::all()->mapWithKeys(fn ($j) => [$j->kode => ['nama' => $j->nama, 'pendek' => $j->pendek()]])->all();
+        }
+
+        return $peta;
     }
 
     public static function rupiah(int $n): string
@@ -109,7 +128,8 @@ class Tanggungan
      */
     public static function buatTagihan(string $tahun, ?array $siswaIds = null): array
     {
-        $tarif = Tarif::where('tahun_ajaran', $tahun)->get()->groupBy('tingkat');
+        $aktif = JenisTagihan::where('aktif', true)->pluck('pola', 'kode');
+        $tarif = Tarif::where('tahun_ajaran', $tahun)->whereIn('jenis', $aktif->keys())->get()->groupBy('tingkat');
         $siswa = Siswa::aktif()->with('kelas')->whereNotNull('kelas_id')->when($siswaIds !== null, fn ($q) => $q->whereIn('id', $siswaIds))->get();
         $ada = Tagihan::where('tahun_ajaran', $tahun)->whereIn('siswa_id', $siswa->pluck('id'))->get(['siswa_id', 'jenis', 'bulan'])
             ->mapWithKeys(fn ($t) => ["$t->siswa_id:$t->jenis:$t->bulan" => true]);
@@ -126,7 +146,7 @@ class Tanggungan
                 continue;
             }
             foreach ($tt as $tr) {
-                $bulan = $tr->jenis === 'syariah' ? array_values(array_diff(self::BULAN_TA, array_map('intval', $tr->bulan_bebas ?? []))) : [0];
+                $bulan = $aktif[$tr->jenis] === 'bulanan' ? array_values(array_diff(self::BULAN_TA, array_map('intval', $tr->bulan_bebas ?? []))) : [0];
                 foreach ($bulan as $b) {
                     if (isset($ada["$s->id:$tr->jenis:$b"])) {
                         continue;

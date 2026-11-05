@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\IntegrasiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\ImporController;
+use App\Http\Controllers\JenisController;
 use App\Http\Controllers\KuitansiController;
 use App\Http\Controllers\PusatSsoController;
 use App\Http\Controllers\PusatWebhookController;
@@ -51,6 +52,9 @@ Route::middleware(['auth', 'akun.aktif'])->group(function () {
         Route::get('/tarif', [TarifController::class, 'index'])->name('tarif.index');
         Route::put('/tarif', [TarifController::class, 'simpan'])->name('tarif.simpan');
         Route::post('/tarif/terapkan', [TarifController::class, 'terapkan'])->middleware('throttle:10,1')->name('tarif.terapkan');
+        Route::get('/jenis-tagihan', [JenisController::class, 'index'])->name('jenis.index');
+        Route::post('/jenis-tagihan', [JenisController::class, 'simpan'])->name('jenis.simpan');
+        Route::put('/jenis-tagihan/{jenis}', [JenisController::class, 'ubah'])->whereNumber('jenis')->name('jenis.ubah');
 
         Route::get('/impor', [ImporController::class, 'index'])->name('impor.index');
         Route::get('/impor/templat', [ImporController::class, 'templat'])->name('impor.templat');

@@ -6,7 +6,7 @@ use App\Services\Tanggungan;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Satu tanggungan siswa: DU satu tahun ajaran (bulan = 0) atau iuran syariah satu bulan.
+ * Satu tanggungan siswa: jenis tahunan satu tahun ajaran (bulan = 0, mis. DU) atau jenis bulanan satu bulan (mis. syariah).
  * Terbayar dihitung dari rincian pembayaran yang tidak dibatalkan (lihat scope denganTerbayar).
  */
 class Tagihan extends Model
@@ -40,8 +40,8 @@ class Tagihan extends Model
     /** Urutan wajar: tahun ajaran, DU dulu, lalu bulan Juli → Juni. */
     public function scopeUrut($q)
     {
-        return $q->orderBy('tahun_ajaran')->orderByRaw("CASE WHEN jenis = 'du' THEN 0 ELSE 1 END")
-            ->orderByRaw('CASE WHEN bulan >= 7 THEN bulan - 6 WHEN bulan = 0 THEN 0 ELSE bulan + 6 END');
+        return $q->orderBy('tahun_ajaran')->orderByRaw("CASE WHEN jenis = 'du' THEN 0 WHEN bulan = 0 THEN 1 ELSE 2 END")
+            ->orderByRaw('CASE WHEN bulan >= 7 THEN bulan - 6 WHEN bulan = 0 THEN 0 ELSE bulan + 6 END')->orderBy('jenis');
     }
 
     public function harus(): int

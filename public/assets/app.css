@@ -440,6 +440,7 @@ fieldset.pilih>legend{font-size:13.5px;font-weight:600;color:var(--ink2);margin-
 .tbl.rekap th,.tbl.rekap td{white-space:nowrap;padding:7px 9px}.tbl.rekap td:nth-child(2){white-space:normal;min-width:180px}
 .tbl.rekap td.sel-kosong{background:var(--bad-bg)}.tbl.rekap td.sel-sebagian{background:var(--warn-bg)}
 ul.galat{margin:6px 0 0;padding-left:20px;color:var(--bad)}ul.galat li{margin:3px 0}
+.jenis-item>summary{list-style:none;cursor:pointer}.jenis-item>summary::-webkit-details-marker{display:none}.jenis-item[open]>summary{background:var(--pri-bg)}
 ul.steps-mini{margin:0;padding-left:20px}ul.steps-mini li{margin:4px 0}
 .letter.kuitansi{max-width:760px;position:relative}
 .kuitansi .kw-judul{text-align:center;font:700 15pt/1.3 "Times New Roman",serif;letter-spacing:.06em;margin:6px 0 0}

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JenisTagihan;
 use App\Models\Tagihan;
 use App\Models\Tarif;
 use App\Services\Audit;
@@ -28,6 +29,7 @@ class TarifController extends Controller
             ->keyBy(fn ($r) => "$r->jenis:$r->tingkat");
 
         return view('tarif.index', ['tahun' => $tahun, 'pilihan' => $pilihan, 'tarif' => $tarif, 'jumlah' => $jumlah,
+            'jenis' => JenisTagihan::where('aktif', true)->urut()->get(),
             'bawaan' => ! Tarif::where('tahun_ajaran', $tahun)->exists()]);
     }
 
@@ -35,21 +37,22 @@ class TarifController extends Controller
     {
         $tahun = $this->tahun($request);
         $d = $request->validate([
-            'du' => 'array', 'du.*' => 'nullable|string|max:12', 'syariah' => 'array', 'syariah.*' => 'nullable|string|max:12',
-            'bebas' => 'array', 'bebas.*' => 'array', 'bebas.*.*' => 'integer|between:1,12', 'perbarui' => 'nullable|boolean',
+            'nominal' => 'array', 'nominal.*' => 'array', 'nominal.*.*' => 'nullable|string|max:12',
+            'bebas' => 'array', 'bebas.*' => 'array', 'bebas.*.*' => 'array', 'bebas.*.*.*' => 'integer|between:1,12', 'perbarui' => 'nullable|boolean',
         ]);
+        $jenis = JenisTagihan::where('aktif', true)->pluck('pola', 'kode');
         $ubah = 0;
-        DB::transaction(function () use ($d, $tahun, &$ubah) {
+        DB::transaction(function () use ($d, $tahun, $jenis, &$ubah) {
             foreach (Tanggungan::TINGKAT as $tk) {
-                foreach (['du', 'syariah'] as $jenis) {
-                    $n = (int) preg_replace('/\D/', '', (string) ($d[$jenis][$tk] ?? ''));
-                    $kunci = ['jenis' => $jenis, 'tahun_ajaran' => $tahun, 'tingkat' => $tk];
+                foreach ($jenis as $kodeJenis => $pola) {
+                    $n = (int) preg_replace('/\D/', '', (string) ($d['nominal'][$kodeJenis][$tk] ?? ''));
+                    $kunci = ['jenis' => $kodeJenis, 'tahun_ajaran' => $tahun, 'tingkat' => $tk];
                     if ($n <= 0) {
                         Tarif::where($kunci)->delete();
 
                         continue;
                     }
-                    Tarif::updateOrCreate($kunci, ['nominal' => $n, 'bulan_bebas' => $jenis === 'syariah' ? array_values(array_map('intval', $d['bebas'][$tk] ?? [])) : null]);
+                    Tarif::updateOrCreate($kunci, ['nominal' => $n, 'bulan_bebas' => $pola === 'bulanan' ? array_values(array_map('intval', $d['bebas'][$kodeJenis][$tk] ?? [])) : null]);
                     if (! empty($d['perbarui'])) {
                         // Hanya tagihan yang belum dibayar sama sekali yang ikut nominal baru.
                         $ubah += Tagihan::where($kunci)->where('nominal', '!=', $n)->whereDoesntHave('rinci', fn ($q) => $q->whereHas('pembayaran', fn ($p) => $p->whereNull('batal_pada')))

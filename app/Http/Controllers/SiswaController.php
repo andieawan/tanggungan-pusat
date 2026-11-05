@@ -76,9 +76,9 @@ class SiswaController extends Controller
             'semua' => 'nullable|boolean'], [], ['potongan' => 'potongan']);
         $potongan = (int) preg_replace('/\D/', '', $d['potongan']);
         $daftar = collect([$tagihan]);
-        if (! empty($d['semua']) && $tagihan->jenis === 'syariah') {
-            // Terapkan ke semua bulan syariah tahun ajaran yang sama (mis. bebas iuran setahun).
-            $daftar = Tagihan::where(['siswa_id' => $tagihan->siswa_id, 'jenis' => 'syariah', 'tahun_ajaran' => $tagihan->tahun_ajaran])->get();
+        if (! empty($d['semua']) && $tagihan->bulan > 0) {
+            // Tagihan bulanan: terapkan ke semua bulan jenis itu pada tahun ajaran yang sama (mis. bebas iuran setahun).
+            $daftar = Tagihan::where(['siswa_id' => $tagihan->siswa_id, 'jenis' => $tagihan->jenis, 'tahun_ajaran' => $tagihan->tahun_ajaran])->where('bulan', '>', 0)->get();
         }
         foreach ($daftar as $t) {
             Tanggungan::keringanan($this->me(), $t, min($potongan, $t->nominal), (string) ($d['alasan'] ?? ''));

@@ -41,8 +41,8 @@ class TanggunganTest extends TestCase
 
     private function tarif(): void
     {
-        $this->actingAs($this->bendahara)->put('/tarif', ['tahun' => $this->tahun, 'du' => ['X' => '1.200.000', 'XII' => '750000'],
-            'syariah' => ['X' => '30000', 'XI' => '30000', 'XII' => '30000'], 'bebas' => ['X' => [7, 8]]])->assertSessionHas('success');
+        $this->actingAs($this->bendahara)->put('/tarif', ['tahun' => $this->tahun, 'nominal' => ['du' => ['X' => '1.200.000', 'XII' => '750000'],
+            'syariah' => ['X' => '30000', 'XI' => '30000', 'XII' => '30000']], 'bebas' => ['syariah' => ['X' => [7, 8]]]])->assertSessionHas('success');
         $this->post('/tarif/terapkan', ['tahun' => $this->tahun])->assertSessionHas('success');
     }
 
@@ -82,7 +82,7 @@ class TanggunganTest extends TestCase
 
         // Rekap DU menampilkan dua angsuran
         $rekap = $this->get('/rekap?kelas=XII+DKV+3')->assertOk()->assertSee('Angsuran 2')->assertSee('450.000')->assertSee('300.000');
-        $this->assertSame([450000, 300000], $rekap->viewData('r')['du'][$this->budi->id]['angsuran']);
+        $this->assertSame([450000, 300000], $rekap->viewData('l')['data'][$this->budi->id]['angsuran']);
 
         // Batal: kuitansi tetap ada, tagihan kembali kurang
         $this->post("/kuitansi/$p->id/batal", ['alasan' => 'x'])->assertSessionHas('error');
@@ -102,7 +102,7 @@ class TanggunganTest extends TestCase
         $this->put("/tagihan/$sep->id/keringanan", ['potongan' => '30000', 'alasan' => 'Yatim', 'semua' => 1])->assertSessionHas('success');
         $this->assertSame(12, Tagihan::where(['siswa_id' => $this->ani->id, 'jenis' => 'syariah', 'potongan' => 30000])->count());
         $this->get("/siswa/{$this->ani->id}")->assertSee('bebas')->assertSee('Yatim');
-        $this->get('/rekap?kelas=XII+DKV+3&tab=1')->assertSee('BEBAS');
+        $this->get('/rekap?kelas=XII+DKV+3&tab=syariah:1')->assertSee('BEBAS');
 
         $du = Tagihan::where(['siswa_id' => $this->ani->id, 'jenis' => 'du'])->first();
         $this->post("/siswa/{$this->ani->id}/bayar", ['tanggal' => date('Y-m-d'), 'cara' => 'tunai', 'jumlah' => [$du->id => '700000']]);
@@ -170,7 +170,7 @@ class TanggunganTest extends TestCase
         $this->assertSame([30000, 'XI DKV 3'], [$aniJul->potongan, $aniJul->kelas_nama]);
         $this->assertTrue(Pembayaran::where('sumber', 'impor')->where('nomor', 'like', 'IMP-%')->exists());
         $this->get('/kuitansi')->assertViewHas('total', 0); // data lama tidak masuk kas harian
-        $this->get('/rekap?tahun='.urlencode($th(2)).'&kelas=X+DKV+3&tab=1')->assertOk()->assertSee('DU');
+        $this->get('/rekap?tahun='.urlencode($th(2)).'&kelas=X+DKV+3&tab=syariah:1')->assertOk()->assertSee('DU');
 
         // Impor ulang: tagihan yang sudah dibayar tidak ditimpa
         $this->post('/impor', ['berkas' => $up(), 'uji' => 0])->assertSessionHas('success', fn ($m) => str_contains($m, 'dilewati'));
@@ -180,6 +180,43 @@ class TanggunganTest extends TestCase
         $salah = Xlsx::build(['SYARIAH' => [$sy[0], array_merge(['9999', 'Tidak Ada', $this->tahun, '', ''], array_fill(0, 12, ''))]]);
         $this->post('/impor', ['berkas' => UploadedFile::fake()->createWithContent('s.xlsx', $salah), 'uji' => 0])
             ->assertSessionHas('error')->assertSessionHas('galat', fn ($g) => str_contains($g[0], 'NIS 9999 tidak dikenal'));
+    }
+
+    public function test_jenis_tagihan_tambahan_tahunan_dan_bulanan(): void
+    {
+        $this->tarif();
+        $this->get('/jenis-tagihan')->assertOk()->assertSee('Daftar Ulang')->assertSee('bawaan');
+        $this->post('/jenis-tagihan', ['nama' => 'Wisuda', 'pola' => 'tahunan', 'keterangan' => 'kelas XII'])->assertRedirect('/tarif');
+        $this->post('/jenis-tagihan', ['nama' => 'Kas Kelas', 'singkat' => 'Kas', 'pola' => 'bulanan'])->assertRedirect('/tarif');
+        $this->post('/jenis-tagihan', ['nama' => 'wisuda', 'pola' => 'tahunan'])->assertSessionHas('error'); // nama sama
+        $this->assertSame(['wisuda', 'kas_kelas'], \App\Models\JenisTagihan::where('bawaan', false)->orderBy('id')->pluck('kode')->all());
+        $this->get('/tarif')->assertSee('Wisuda')->assertSee('name="nominal[kas_kelas][XII]"', false)->assertSee('name="bebas[kas_kelas][XII][]"', false);
+
+        $this->put('/tarif', ['tahun' => $this->tahun, 'nominal' => ['du' => ['X' => '1200000', 'XII' => '750000'], 'syariah' => ['X' => '30000', 'XI' => '30000', 'XII' => '30000'],
+            'wisuda' => ['XII' => '400000'], 'kas_kelas' => ['XII' => '5000']], 'bebas' => ['syariah' => ['X' => [7, 8]], 'kas_kelas' => ['XII' => [6]]]]);
+        $this->post('/tarif/terapkan', ['tahun' => $this->tahun])->assertSessionHas('success');
+        $this->assertSame(1, Tagihan::where(['siswa_id' => $this->budi->id, 'jenis' => 'wisuda'])->count());
+        $this->assertSame(11, Tagihan::where(['siswa_id' => $this->budi->id, 'jenis' => 'kas_kelas'])->count()); // Juni dibebaskan
+        $this->assertSame(0, Tagihan::where(['siswa_id' => Siswa::where('nis', '2001')->value('id'), 'jenis' => 'wisuda'])->count()); // kelas X tidak dikenai
+
+        $w = Tagihan::where(['siswa_id' => $this->budi->id, 'jenis' => 'wisuda'])->first();
+        $kas = Tagihan::where(['siswa_id' => $this->budi->id, 'jenis' => 'kas_kelas', 'bulan' => 7])->first();
+        $this->assertSame(['Wisuda '.$this->tahun, 'Kas Juli '.substr($this->tahun, 0, 4)], [$w->label(), $kas->label()]);
+        $this->post("/siswa/{$this->budi->id}/bayar", ['tanggal' => date('Y-m-d'), 'cara' => 'tunai', 'jumlah' => [$w->id => '100000', $kas->id => '5000']])->assertRedirect();
+        $this->get('/kuitansi/'.Pembayaran::latest('id')->value('id'))->assertSee('Wisuda '.$this->tahun)->assertSee('Kas Juli');
+
+        $r = $this->get('/rekap?kelas=XII+DKV+3&tab=wisuda')->assertOk()->assertSee('Angsuran 1')->assertSee('100.000');
+        $this->assertSame(['du', 'syariah:1', 'syariah:2', 'kas_kelas:1', 'kas_kelas:2', 'wisuda'], collect($r->viewData('r')['lembar'])->pluck('kunci')->all());
+        $this->get('/rekap?kelas=XII+DKV+3&tab=kas_kelas:2')->assertOk()->assertSee('Kas semester 2');
+
+        // Nonaktif: tidak dibuatkan tagihan baru, yang lama tetap
+        $j = \App\Models\JenisTagihan::where('kode', 'wisuda')->first();
+        $this->put("/jenis-tagihan/$j->id", ['nama' => 'Wisuda & Perpisahan', 'aktif' => 0])->assertSessionHas('success');
+        Siswa::create(['pusat_uuid' => 's9', 'nis' => '1009', 'nama' => 'Dina Baru', 'kelas_id' => $this->kelas->id, 'status' => 'aktif']);
+        $this->post('/tarif/terapkan', ['tahun' => $this->tahun]);
+        $this->assertSame(0, Tagihan::where(['siswa_id' => Siswa::where('nis', '1009')->value('id'), 'jenis' => 'wisuda'])->count());
+        $this->assertSame('Wisuda & Perpisahan '.$this->tahun, $w->fresh()->label());
+        $this->get("/siswa/{$this->budi->id}")->assertSee('Wisuda &amp; Perpisahan', false);
     }
 
     public function test_rekap_unduh_excel_dan_terbilang(): void

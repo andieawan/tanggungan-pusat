@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/** Tarif satu jenis tanggungan untuk satu tahun ajaran & tingkat. DU: setahun; syariah: per bulan. */
+/** Tarif satu jenis tanggungan untuk satu tahun ajaran & tingkat. Jenis tahunan: nominal setahun; bulanan: per bulan. */
 class Tarif extends Model
 {
     protected $table = 'tarif';

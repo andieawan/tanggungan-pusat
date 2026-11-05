@@ -106,7 +106,11 @@ class SemuaHalamanTest extends TestCase
         Siswa::create(['pusat_uuid' => 's2', 'nis' => '1002', 'nama' => 'Ani Lestari', 'jk' => 'P', 'kelas_id' => $k->id, 'status' => 'aktif']);
         Siswa::create(['pusat_uuid' => 's3', 'nis' => '0901', 'nama' => 'Alumni Lama', 'jk' => 'L', 'kelas_id' => null, 'status' => 'lulus']);
         $tahun = \App\Services\Tanggungan::tahunAktif();
-        $this->actingAs($bendahara)->put('/tarif', ['tahun' => $tahun, 'du' => ['XII' => '750000'], 'syariah' => ['X' => '30000', 'XI' => '30000', 'XII' => '30000'], 'bebas' => ['X' => [7, 8]]]);
+        $this->actingAs($bendahara)->put('/tarif', ['tahun' => $tahun, 'nominal' => ['du' => ['XII' => '750000'], 'syariah' => ['X' => '30000', 'XI' => '30000', 'XII' => '30000']], 'bebas' => ['syariah' => ['X' => [7, 8]]]]);
+        $this->post('/jenis-tagihan', ['nama' => 'Ujian Akhir Semester', 'pola' => 'tahunan']);
+        $ujian = \App\Models\JenisTagihan::where('nama', 'Ujian Akhir Semester')->value('kode');
+        $this->put('/tarif', ['tahun' => $tahun, 'nominal' => ['du' => ['XII' => '750000'], 'syariah' => ['X' => '30000', 'XI' => '30000', 'XII' => '30000'],
+            $ujian => ['X' => '150000', 'XI' => '150000', 'XII' => '150000']], 'bebas' => ['syariah' => ['X' => [7, 8]]]]);
         $this->post('/tarif/terapkan', ['tahun' => $tahun]);
         $t = \App\Models\Tagihan::where(['siswa_id' => $s1->id, 'jenis' => 'du'])->firstOrFail();
         $this->post("/siswa/$s1->id/bayar", ['tanggal' => date('Y-m-d'), 'cara' => 'tunai', 'jumlah' => [$t->id => '300000']])->assertRedirect();

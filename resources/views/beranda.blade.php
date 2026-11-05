@@ -42,14 +42,14 @@
         <div class="empty">Belum ada tagihan untuk tahun ajaran ini.</div>
     @else
     <div class="scroll"><table class="tbl tbl-cards">
-        <thead><tr><th>Kelas</th><th class="c">Siswa lunas</th><th class="r">Kurang DU</th><th class="r">Kurang syariah</th><th class="r">Terbayar</th><th></th></tr></thead>
+        <thead><tr><th>Kelas</th><th class="c">Siswa lunas</th><th class="r">Kurang</th><th class="r">Terbayar</th><th></th></tr></thead>
         <tbody>
         @foreach($kelas as $k)
             <tr>
                 <td class="card-title"><b>{{ $k['kelas'] ?: '—' }}</b></td>
                 <td class="c" data-label="Siswa lunas"><span class="mono">{{ $k['siswa_lunas'] }} / {{ $k['siswa'] }}</span></td>
-                <td class="r mono" data-label="Kurang DU">{{ $k['du_kurang'] ? $rp($k['du_kurang']) : '—' }}</td>
-                <td class="r mono" data-label="Kurang syariah">{{ $k['syariah_kurang'] ? $rp($k['syariah_kurang']) : '—' }}</td>
+                <td class="r" data-label="Kurang"><span class="mono">{{ $k['kurang'] ? $rp($k['kurang']) : '—' }}</span>
+                    @if(count($k['per_jenis']) > 1)<small class="mut" style="display:block">@foreach($k['per_jenis'] as $j => $n){{ $namaJenis[$j] ?? $j }} {{ $rp($n) }}@if(! $loop->last) · @endif @endforeach</small>@endif</td>
                 <td class="r mono" data-label="Terbayar">{{ $rp($k['terbayar']) }}</td>
                 <td class="r"><a class="btn btn-sm" href="{{ route('rekap.index', ['tahun' => $tahun, 'kelas' => $k['kelas']]) }}">Rekap</a></td>
             </tr>

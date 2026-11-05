@@ -38,7 +38,7 @@
         <tbody>
         @foreach($terbuka as $t)
             <tr>
-                <td>{{ $t->label() }}@if($t->jenis === 'du' && $t->terbayar)<small class="mut" style="display:block">angsuran, sudah {{ $rp($t->terbayar) }}</small>@endif</td>
+                <td>{{ $t->label() }}@if($t->bulan === 0 && $t->terbayar)<small class="mut" style="display:block">angsuran, sudah {{ $rp($t->terbayar) }}</small>@endif</td>
                 <td class="r mono">{{ $rp($t->kurang()) }}</td>
                 <td class="r"><div class="row" style="flex-wrap:nowrap;justify-content:flex-end">
                     <input type="text" inputmode="numeric" name="jumlah[{{ $t->id }}]" value="{{ old('jumlah.'.$t->id) }}" data-kurang="{{ $t->kurang() }}" aria-label="Dibayar untuk {{ $t->label() }}" style="width:110px;text-align:right">
@@ -86,7 +86,7 @@
             <select id="k-tagihan" data-ganti-aksi>@foreach($perTahun as $th => $ts)<optgroup label="{{ $th }}">@foreach($ts as $t)<option value="{{ route('siswa.keringanan', $t) }}">{{ $t->label() }} — {{ $rp($t->nominal) }}{{ $t->potongan ? ' (potongan '.$rp($t->potongan).')' : '' }}</option>@endforeach</optgroup>@endforeach</select></div>
         <div><label for="k-pot">Potongan (Rp)</label><input id="k-pot" type="text" inputmode="numeric" name="potongan" required placeholder="0 = hapus keringanan"></div>
         <div style="grid-column:span 2"><label for="k-alasan">Alasan</label><input id="k-alasan" type="text" name="alasan" maxlength="255" placeholder="mis. yatim, beasiswa, kesepakatan komite"></div>
-        <label class="chk" style="grid-column:1/-1"><input type="checkbox" name="semua" value="1"> Untuk syariah: terapkan ke semua bulan pada tahun ajaran itu</label>
+        <label class="chk" style="grid-column:1/-1"><input type="checkbox" name="semua" value="1"> Untuk tagihan bulanan (mis. syariah): terapkan ke semua bulan jenis itu pada tahun ajaran yang sama</label>
         <div class="row"><button class="btn">Simpan keringanan</button></div>
     </form>
 </details>

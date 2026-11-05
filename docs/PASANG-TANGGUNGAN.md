@@ -65,13 +65,17 @@ sudo -u www-data php artisan tanggungan:sinkron      # salin kelas, siswa, guru 
 
 ## 5. Mulai tahun ajaran
 
-1. **Pengaturan → Tarif**: isi daftar ulang (setahun) dan iuran syariah (per bulan) untuk kelas X, XI, XII. Centang bulan
-   tanpa iuran (bawaan: Juli & Agustus kelas X, karena termasuk daftar ulang). Simpan.
-2. **Buat tagihan untuk semua siswa aktif.** Aman diulang: siswa baru ikut dibuatkan, yang sudah ada tidak berubah.
-3. Bendahara: **Siswa** → cari nama → **Terima pembayaran**. Isi jumlah per tagihan (tombol *Lunas* per baris, atau
+1. (Opsional) **Pengaturan → Jenis tagihan**: tambah jenis selain daftar ulang & syariah, mis. ujian, PKL, wisuda, seragam.
+   Pilih *sekali per tahun ajaran* (boleh diangsur) atau *per bulan*. Jenis yang nonaktif tidak dibuatkan tagihan baru;
+   tagihan lamanya tetap tercatat.
+2. **Pengaturan → Tarif**: isi nominal tiap jenis untuk kelas X, XI, XII; kosongkan tingkat yang tidak dikenai (mis. wisuda
+   hanya XII). Untuk jenis bulanan, centang bulan tanpa tagihan (bawaan syariah: Juli & Agustus kelas X, termasuk daftar
+   ulang). Simpan.
+3. **Buat tagihan untuk semua siswa aktif.** Aman diulang: siswa baru dan jenis baru ikut dibuatkan, yang sudah ada tidak berubah.
+4. Bendahara: **Siswa** → cari nama → **Terima pembayaran**. Isi jumlah per tagihan (tombol *Lunas* per baris, atau
    *Bagi* untuk membagi uang yang diterima ke tagihan tertua). Simpan → kuitansi bernomor siap dicetak.
-4. Salah catat: buka kuitansi → **Batalkan** dengan alasan (kuitansi tetap tercatat), lalu catat ulang.
-5. Keringanan / beasiswa / bebas iuran: di kartu siswa → *Keringanan*, dengan alasan.
+5. Salah catat: buka kuitansi → **Batalkan** dengan alasan (kuitansi tetap tercatat), lalu catat ulang.
+6. Keringanan / beasiswa / bebas iuran: di kartu siswa → *Keringanan*, dengan alasan.
 
 ## 6. Data lama (sebelum aplikasi dipakai)
 

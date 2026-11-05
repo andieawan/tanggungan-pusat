@@ -4,7 +4,7 @@
 <div class="card login">
     <img class="logo-login" src="{{ asset('icons/icon-192.png') }}?v={{ @filemtime(public_path('icons/icon-192.png')) }}" alt="" width="56" height="56">
     <h1>Tanggungan Siswa</h1>
-    <p class="mut">{{ config('tanggungan.school_name') }}<br>Daftar ulang &amp; iuran syariah. Masuk dengan akun Pusat Sekolah.</p>
+    <p class="mut">{{ config('tanggungan.school_name') }}<br>Daftar ulang, iuran syariah &amp; tagihan sekolah lainnya. Masuk dengan akun Pusat Sekolah.</p>
     @if($pusat)<a class="btn btn-pri btn-blok" href="{{ route('sso.login') }}">Masuk lewat Pusat</a>@endif
     @if(config('tanggungan.login_lokal'))
         @if($pusat)<div class="login-atau"><span>atau dengan username &amp; password</span></div>@endif

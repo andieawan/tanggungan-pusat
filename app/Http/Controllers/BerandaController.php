@@ -29,7 +29,7 @@ class BerandaController extends Controller
 
             return Tanggungan::ringkas($ts) + ['kelas' => $nama, 'siswa' => $per->count(),
                 'siswa_lunas' => $per->filter(fn ($x) => $x->every(fn ($t) => $t->lunas()))->count(),
-                'du_kurang' => $ts->where('jenis', 'du')->sum(fn ($t) => $t->kurang()), 'syariah_kurang' => $ts->where('jenis', 'syariah')->sum(fn ($t) => $t->kurang())];
+                'per_jenis' => $ts->groupBy('jenis')->map(fn ($x) => $x->sum(fn ($t) => $t->kurang()))->filter()->all()];
         })->sortKeys(SORT_NATURAL)->values();
 
         $hari = Dates::today();
@@ -43,7 +43,7 @@ class BerandaController extends Controller
             'tahun' => $tahun, 'daftarTahun' => $daftarTahun, 'total' => Tanggungan::ringkas($tagihan), 'kelas' => $kelas, 'kas' => $kas, 'hari' => $hari,
             'tarifKosong' => $u->isKasir() && ! Tarif::where('tahun_ajaran', $tahun)->exists(),
             'tanpaTagihan' => $u->isKasir() ? Akses::siswa($u)->aktif()->whereNotNull('kelas_id')->whereDoesntHave('tagihan', fn ($q) => $q->where('tahun_ajaran', $tahun))->count() : 0,
-            'wali' => $u->lihatSemua() ? collect() : $u->kelasWali(),
+            'wali' => $u->lihatSemua() ? collect() : $u->kelasWali(), 'namaJenis' => Tanggungan::jenis()->map->nama,
         ]);
     }
 }

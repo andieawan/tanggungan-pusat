@@ -1,6 +1,7 @@
 # Tanggungan Siswa — SMKS Islam Bustanul Ulum
 
-Aplikasi mandiri untuk tanggungan keuangan siswa: **daftar ulang** (boleh diangsur) dan **iuran syariah** bulanan.
+Aplikasi mandiri untuk tanggungan keuangan siswa: **daftar ulang** (boleh diangsur), **iuran syariah** bulanan, dan
+**jenis tagihan lain** yang ditambah bendahara (ujian, PKL, wisuda, seragam, …; tahunan atau bulanan).
 Bendahara mencatat pembayaran dan mencetak kuitansi; kepala sekolah melihat semua; wali kelas melihat kelasnya.
 Rekap per kelas berbentuk seperti lembar Excel lama dan bisa diunduh. Data lama bisa diimpor dari templat Excel per kelas.
 

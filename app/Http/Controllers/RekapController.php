@@ -8,7 +8,7 @@ use App\Services\Tanggungan;
 use App\Support\Xlsx;
 use Illuminate\Http\Request;
 
-/** Rekap per kelas seperti lembar Excel: daftar ulang + iuran syariah semester ganjil & genap; bisa diunduh. */
+/** Rekap per kelas seperti lembar Excel: satu lembar per jenis tahunan, dua (semester) per jenis bulanan; bisa diunduh. */
 class RekapController extends Controller
 {
     private function pilih(Request $r): array
@@ -26,10 +26,12 @@ class RekapController extends Controller
     public function index(Request $request)
     {
         [$u, $daftarTahun, $tahun, $kelasDaftar, $kelas] = $this->pilih($request);
-        $tab = in_array($request->query('tab'), ['du', '1', '2'], true) ? $request->query('tab') : 'du';
+        $r = $kelas ? Rekap::kelas($u, $tahun, $kelas) : null;
+        $kunci = collect($r['lembar'] ?? [])->pluck('kunci');
+        $tab = $kunci->contains($request->query('tab')) ? $request->query('tab') : $kunci->first();
 
         return view('rekap.index', ['daftarTahun' => $daftarTahun, 'tahun' => $tahun, 'kelasDaftar' => $kelasDaftar, 'kelas' => $kelas, 'tab' => $tab,
-            'r' => $kelas ? Rekap::kelas($u, $tahun, $kelas) : null]);
+            'r' => $r, 'l' => collect($r['lembar'] ?? [])->firstWhere('kunci', $tab)]);
     }
 
     public function unduh(Request $request)
