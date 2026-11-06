@@ -16,7 +16,7 @@ return [
     'ca_bundle' => env('PUSAT_CA_BUNDLE'),
 
     // Sinkron kelas, siswa & pegawai otomatis tiap jam (selain webhook). Bawaan mati; tombol Admin → Integrasi selalu ada.
-    'sinkron_otomatis' => (bool) env('PUSAT_SINKRON_OTOMATIS', false),
+    'sinkron_otomatis' => (bool) env('PUSAT_SINKRON_OTOMATIS', true),
 
     // Peran di Pusat -> peran lokal Tanggungan. Bendahara mencatat pembayaran; kepsek & wali kelas hanya melihat.
     'peran_peta' => [

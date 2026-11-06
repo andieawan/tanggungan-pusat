@@ -64,4 +64,16 @@ class LoginCadanganTest extends TestCase
         $this->post('/login', ['username' => 'g001', 'password' => 'Rahasia12345'])->assertRedirect();
         $this->assertAuthenticated();
     }
+
+    public function test_akun_baru_dari_webhook_langsung_bisa_login_lokal(): void
+    {
+        $peran = array_key_first((array) config('pusat.peran_peta'));
+        $this->kirim('akses.diperbarui', ['uuid' => 'a-9', 'username' => 'g009', 'nama' => 'Guru Baru', 'aktif' => true, 'peran' => [$peran],
+            'password_hash' => password_hash('SandiPusat123', PASSWORD_BCRYPT)], 'd9')->assertOk();
+        $this->assertSame('Guru Baru', User::where('pusat_uuid', 'a-9')->value('nama'));
+        $this->post('/login', ['username' => 'g009', 'password' => 'SandiPusat123'])->assertRedirect();
+        $this->assertAuthenticated();
+        $this->kirim('akses.diperbarui', ['uuid' => 'a-10', 'username' => 'g010', 'aktif' => true, 'peran' => [], 'password_hash' => null], 'd10')->assertOk();
+        $this->assertNull(User::where('pusat_uuid', 'a-10')->first()); // tanpa peran di aplikasi ini: tidak dibuat
+    }
 }
