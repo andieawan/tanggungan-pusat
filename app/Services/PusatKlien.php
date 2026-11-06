@@ -42,33 +42,6 @@ class PusatKlien
     }
 
     /**
-     * Tulis ke Pusat (mutasi siswa). Mengembalikan "data" jawaban; melempar UserError berpesan jelas bila ditolak.
-     *
-     * @return array<string,mixed>
-     */
-    public static function tulis(string $metode, string $path, array $data): array
-    {
-        if (! self::aktif()) {
-            throw new \App\Exceptions\UserError('Sambungan ke Pusat belum aktif: mutasi siswa ditulis ke Pusat. Hubungi admin.');
-        }
-        try {
-            $res = self::http()->{$metode}($path, $data);
-        } catch (\Throwable $e) {
-            report($e);
-            throw new \App\Exceptions\UserError('Pusat tidak dapat dihubungi, tidak ada data yang berubah. Coba lagi sebentar lagi.');
-        }
-        if (! $res->successful()) {
-            $pesan = (string) ($res->json('error.pesan') ?: 'HTTP '.$res->status());
-            if ($res->status() === 403) {
-                $pesan = 'Aplikasi Tanggungan belum diberi izin "siswa_tulis" di Pusat ('.$pesan.').';
-            }
-            throw new \App\Exceptions\UserError('Pusat menolak: '.$pesan);
-        }
-
-        return (array) $res->json('data', []);
-    }
-
-    /**
      * Ambil SEMUA baris sebuah sumber (halaman demi halaman).
      *
      * @return array<int,array>

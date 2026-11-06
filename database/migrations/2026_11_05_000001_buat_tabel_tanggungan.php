@@ -85,11 +85,6 @@ return new class extends Migration
             $t->timestamps();
         });
 
-        Schema::create('pengaturan', function (Blueprint $t) {
-            $t->string('kunci', 40)->primary();
-            $t->text('nilai')->nullable();
-            $t->timestamp('updated_at')->nullable();
-        });
 
         // ---- Integrasi ----
         Schema::create('pusat_state', function (Blueprint $t) {
@@ -166,7 +161,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        foreach (['pembayaran_rinci', 'pembayaran', 'tagihan', 'tarif', 'audit_log', 'pusat_webhook', 'pusat_state', 'pengaturan',
+        foreach (['pembayaran_rinci', 'pembayaran', 'tagihan', 'tarif', 'audit_log', 'pusat_webhook', 'pusat_state',
             'pegawai', 'siswa', 'kelas', 'sessions', 'password_reset_tokens', 'users'] as $tabel) {
             Schema::dropIfExists($tabel);
         }

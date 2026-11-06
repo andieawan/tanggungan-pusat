@@ -41,17 +41,6 @@ class Dates
         return $ymd > self::today();
     }
 
-    /** Selisih hari (dibulatkan ke bawah) antara sekarang dan tanggal. Negatif = masa depan. */
-    public static function daysSince(string $ymd): int
-    {
-        return (int) floor((time() - (int) self::parse($ymd)) / 86400);
-    }
-
-    public static function weekday(string $ymd): int
-    {
-        return (int) gmdate('w', (int) self::parse($ymd));
-    }
-
     public static function human(string $ymd): string
     {
         $ts = self::parse($ymd);
@@ -73,13 +62,6 @@ class Dates
     public static function nowMillis(): int
     {
         return (int) floor(microtime(true) * 1000);
-    }
-
-    public static function isoUtc(?int $millis = null): string
-    {
-        $millis ??= self::nowMillis();
-
-        return gmdate('Y-m-d\TH:i:s', intdiv($millis, 1000)).sprintf('.%03dZ', $millis % 1000);
     }
 
     public static function local(int $millis): string

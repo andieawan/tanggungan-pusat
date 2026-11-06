@@ -122,15 +122,6 @@ class Xlsx
         ]);
     }
 
-    /** Baris pertama = header (huruf kecil); kembalikan [header, baris...]. */
-    public static function readWithHeader(string $path, string $name): array
-    {
-        $rows = self::readFile($path, $name);
-        $hdr = array_map(fn ($v) => strtolower(trim((string) $v)), array_shift($rows) ?? []);
-
-        return [$hdr, $rows];
-    }
-
     public static function col(array $hdr, array $names): ?int
     {
         foreach ($names as $n) {
