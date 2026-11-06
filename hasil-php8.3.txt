@@ -5,6 +5,6 @@ Configuration: /home/runner/work/tanggungan-pusat/tanggungan-pusat/phpunit.xml
 
 .................                                                 17 / 17 (100%)
 
-Time: 00:01.583, Memory: 60.50 MB
+Time: 00:02.307, Memory: 60.50 MB
 
-OK (17 tests, 196 assertions)
+OK (17 tests, 195 assertions)
