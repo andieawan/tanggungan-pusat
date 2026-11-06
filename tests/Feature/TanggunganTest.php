@@ -33,10 +33,10 @@ class TanggunganTest extends TestCase
         $this->bendahara = User::create(['username' => 'bend', 'nama' => 'Bu Bendahara', 'roles' => ['bendahara'], 'aktif' => true]);
         Pegawai::create(['pusat_uuid' => 'g1', 'nama' => 'Andi Kurniawan', 'aktif' => true]);
         $this->kelas = Kelas::create(['pusat_uuid' => 'k1', 'nama' => 'XII DKV 3', 'tingkat' => 'XII', 'wali_uuid' => 'g1', 'wali_nama' => 'Andi Kurniawan']);
-        Kelas::create(['pusat_uuid' => 'k2', 'nama' => 'X DKV 1', 'tingkat' => 'X']);
+        $k2 = Kelas::create(['pusat_uuid' => 'k2', 'nama' => 'X DKV 1', 'tingkat' => 'X']);
         $this->budi = Siswa::create(['pusat_uuid' => 's1', 'nis' => '1001', 'nama' => 'Budi Santoso', 'jk' => 'L', 'kelas_id' => $this->kelas->id, 'status' => 'aktif']);
         $this->ani = Siswa::create(['pusat_uuid' => 's2', 'nis' => '1002', 'nama' => 'Ani Lestari', 'jk' => 'P', 'kelas_id' => $this->kelas->id, 'status' => 'aktif']);
-        Siswa::create(['pusat_uuid' => 's3', 'nis' => '2001', 'nama' => 'Citra Baru', 'jk' => 'P', 'kelas_id' => 2, 'status' => 'aktif']);
+        Siswa::create(['pusat_uuid' => 's3', 'nis' => '2001', 'nama' => 'Citra Baru', 'jk' => 'P', 'kelas_id' => $k2->id, 'status' => 'aktif']);
     }
 
     private function tarif(): void
