@@ -42,6 +42,8 @@ class PusatWebhookController extends Controller
             $data = (array) $request->json('data', []);
             if ($event === 'sambungan.diperbarui') {
                 \App\Services\Sambungan::tarik(); // gagal → transaksi batal → Pusat mengirim ulang
+            } elseif ($event === 'sinkron.diminta') {
+                PusatKlien::simpan('perlu_sinkron', 1); // dari Pusat (tombol Sinkronkan / setelah impor): sinkron penuh ±1 menit lagi
             } elseif ($event === 'profil.diperbarui') {
                 \App\Services\ProfilPusat::tarik();
             } elseif (in_array($event, ['akun.diperbarui', 'akses.diperbarui'], true)) {
