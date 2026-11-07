@@ -17,6 +17,19 @@ class PusatSync
     /** @return array{kelas:array,siswa:array,pegawai:array,tahun_aktif:?string} */
     public function jalankan(): array
     {
+        try {
+            $h = $this->jalankanInti();
+        } catch (\Throwable $e) {
+            PusatKlien::lapor(false, [], $e->getMessage());
+            throw $e;
+        }
+        PusatKlien::lapor(true, $h); // Pusat menampilkan "selesai sinkron" + notifikasi admin
+
+        return $h;
+    }
+
+    private function jalankanInti(): array
+    {
         Sambungan::tarikAman(); // sambungan antar-aplikasi ikut diperbarui setiap sinkron
         ProfilPusat::tarikAman(); // profil sekolah (kop surat, kepala sekolah, logo)
         $tahun = PusatKlien::semua('tahun-ajaran');
