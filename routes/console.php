@@ -23,11 +23,11 @@ Schedule::command('tanggungan:sinkron')->everyFifteenMinutes()->withoutOverlappi
 });
 
 // Ada perubahan dari Pusat yang perlu ditarik (permintaan sinkron dari Pusat, atau data yang belum dikenal):
-// sinkron penuh dalam ±1 menit tanpa menunggu admin. Paling sering sekali per 5 menit bila gagal/berulang.
+// sinkron penuh dalam ±1 menit tanpa menunggu admin. Paling sering sekali per menit (permintaan beruntun tidak perlu menunggu 5 menit).
 Schedule::command('tanggungan:sinkron')->everyMinute()->withoutOverlapping(30)->when(function () {
     try {
         return \App\Services\PusatKlien::aktif() && \App\Services\PusatKlien::baca('perlu_sinkron') !== null
-            && \Illuminate\Support\Facades\Cache::add('pusat-sinkron-diminta', 1, 300);
+            && \Illuminate\Support\Facades\Cache::add('pusat-sinkron-diminta', 1, 50);
     } catch (\Throwable) {
         return false;
     }
