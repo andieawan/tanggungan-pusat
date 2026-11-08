@@ -5,14 +5,14 @@ Satu aplikasi = satu VM, sama seperti Jurnal, BK, TU, dan PKL. Bendahara, kepala
 
 | | Nilai |
 |---|---|
-| VM / IP | tanggungan / `192.168.10.26` |
+| VM / IP | tanggungan / `192.168.10.31` |
 | Folder | `/var/www/tanggungan` |
 | Database / user | `tanggungan` / `tanggungan` (password acak, dibuat skrip) |
 | Domain | `tanggungan.smkibupakusari.sch.id` |
 
 ## 1. VM baru
 
-Ubuntu Server 24.04 / 26.04 (atau Debian 13), IP tetap `192.168.10.26/24`, gateway `192.168.10.254`.
+Ubuntu Server 24.04 / 26.04 (atau Debian 13), IP tetap `192.168.10.31/24`, gateway `192.168.10.254`.
 
 ```bash
 sudo mkdir -p /var/www/tanggungan && sudo chown $USER:$USER /var/www/tanggungan
@@ -25,7 +25,7 @@ sudo DOMAIN=tanggungan.smkibupakusari.sch.id APP_URL=https://tanggungan.smkibupa
 Skrip memasang Nginx, PHP, MariaDB, cron, membuat database dengan password acak, menulis `.env`, dan menjadwalkan
 backup harian 01:45. Aman diulang.
 
-Di **NPMplus**: Proxy Host `tanggungan.smkibupakusari.sch.id` → `192.168.10.26`, port 80, SSL Let's Encrypt, **Force SSL**.
+Di **NPMplus**: Proxy Host `tanggungan.smkibupakusari.sch.id` → `192.168.10.31`, port 80, SSL Let's Encrypt, **Force SSL**.
 
 ## 2. Daftarkan di Pusat (VM Pusat)
 
