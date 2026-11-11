@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\ImporController;
 use App\Http\Controllers\JenisController;
+use App\Http\Controllers\KasController;
 use App\Http\Controllers\KuitansiController;
 use App\Http\Controllers\PusatSsoController;
 use App\Http\Controllers\PusatWebhookController;
@@ -40,6 +41,13 @@ Route::middleware(['auth', 'akun.aktif'])->group(function () {
         Route::get('/kuitansi', [KuitansiController::class, 'index'])->name('kuitansi.index');
         Route::get('/kuitansi/unduh', [KuitansiController::class, 'unduh'])->name('kuitansi.unduh');
         Route::get('/kuitansi/{pembayaran}', [KuitansiController::class, 'show'])->whereNumber('pembayaran')->name('kuitansi.show');
+
+        // Keuangan: buku kas (pembayaran siswa + transaksi lain), rekap bulanan; kepala sekolah ikut melihat
+        Route::get('/kas', [KasController::class, 'index'])->name('kas.index');
+        Route::get('/kas/unduh', [KasController::class, 'unduh'])->name('kas.unduh');
+        Route::get('/kas/rekap', [KasController::class, 'rekap'])->name('kas.rekap');
+        Route::get('/kas/rekap/unduh', [KasController::class, 'rekapUnduh'])->name('kas.rekap.unduh');
+        Route::get('/kas/{transaksi}/bukti', [KasController::class, 'bukti'])->whereNumber('transaksi')->name('kas.bukti');
     });
 
     // Bendahara (dan admin): mencatat pembayaran, keringanan, tarif, impor data lama
@@ -47,6 +55,11 @@ Route::middleware(['auth', 'akun.aktif'])->group(function () {
         Route::post('/siswa/{siswa}/bayar', [SiswaController::class, 'bayar'])->whereNumber('siswa')->middleware('throttle:60,1')->name('siswa.bayar');
         Route::post('/siswa/{siswa}/tagihan', [SiswaController::class, 'buatTagihan'])->whereNumber('siswa')->name('siswa.tagihan');
         Route::put('/tagihan/{tagihan}/keringanan', [SiswaController::class, 'keringanan'])->whereNumber('tagihan')->name('siswa.keringanan');
+        Route::post('/kas', [KasController::class, 'simpan'])->middleware('throttle:60,1')->name('kas.simpan');
+        Route::post('/kas/{transaksi}/batal', [KasController::class, 'batal'])->whereNumber('transaksi')->name('kas.batal');
+        Route::get('/kas/kategori', [KasController::class, 'kategori'])->name('kas.kategori');
+        Route::post('/kas/kategori', [KasController::class, 'kategoriSimpan'])->name('kas.kategori.simpan');
+        Route::put('/kas/kategori/{kategori}', [KasController::class, 'kategoriUbah'])->whereNumber('kategori')->name('kas.kategori.ubah');
         Route::post('/kuitansi/{pembayaran}/batal', [KuitansiController::class, 'batal'])->whereNumber('pembayaran')->name('kuitansi.batal');
 
         Route::get('/tarif', [TarifController::class, 'index'])->name('tarif.index');

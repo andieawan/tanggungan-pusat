@@ -459,3 +459,14 @@ input[type=file]{padding:6px}
 input[type=file]::file-selector-button{min-height:34px;margin-right:12px;padding:0 14px;border:1px solid var(--pri-line);border-radius:8px;background:var(--pri-bg);color:var(--pri-d);font:600 14px/1 "Plus Jakarta Sans",system-ui,sans-serif;cursor:pointer}
 /* Kepala halaman di HP: judul besar tetap terbaca, tombol aksi utama selebar layar */
 @media(max-width:560px){h1{font-size:21px}.card{padding:16px}.wrap{padding:16px 12px 64px}}
+
+/* Keuangan (buku kas) */
+.print-only{display:none}
+.kas-kop{margin:0 0 12px;font-size:15px;line-height:1.5}
+.kas-tbl td,.kas-tbl th{font-size:13.5px}
+.kas-batal td{color:var(--mut);text-decoration:line-through}.kas-batal td .badge,.kas-batal td small{text-decoration:none}
+.kas-aksi{display:inline-block;margin-left:8px}.kas-aksi input{min-width:140px}
+.kas-rekap td,.kas-rekap th{font-size:13px;white-space:nowrap}
+.kas-rekap tr.kas-sub th{background:var(--line2);text-align:left}
+.kas-rekap tr.kas-total td{font-weight:700;border-top:2px solid var(--line)}
+@media print{.print-only{display:block}.kas-tbl,.kas-rekap{font-size:11px}.scroll{overflow:visible}}
